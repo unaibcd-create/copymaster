@@ -93,7 +93,7 @@ export const AddPromptModal = ({ isOpen, onClose }: AddPromptModalProps) => {
 
           <div className="form-group add-prompt-group">
             <label>Color</label>
-            <div className="color-picker add-prompt-color-picker">
+            <div className="color-picker add-prompt-color-picker" role="radiogroup" aria-label="Prompt color">
               {PROMPT_COLORS.map((color) => (
                 <button
                   key={color}
@@ -102,6 +102,7 @@ export const AddPromptModal = ({ isOpen, onClose }: AddPromptModalProps) => {
                   style={{ background: color }}
                   onClick={() => setSelectedColor(color)}
                   aria-label={`Select color ${color}`}
+                  aria-pressed={selectedColor === color}
                 />
               ))}
             </div>

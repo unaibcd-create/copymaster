@@ -257,13 +257,22 @@
 }
 
 .add-prompt-color-picker {
-  gap: 10px;
+  gap: 12px;
+  align-items: center;
 }
 
 .add-prompt-color-picker .color-option {
-  width: 34px;
-  height: 34px;
-  border: 2px solid rgba(255, 255, 255, 0.58);
+  width: 36px;
+  height: 36px;
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+  padding: 0;
+  flex: 0 0 36px;
+  border: 2px solid color-mix(in srgb, var(--color-card-bg) 85%, black 15%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3),
+    0 1px 2px rgba(2, 8, 20, 0.22);
+  transform-origin: center;
 }
 
 .add-prompt-color-picker .color-option:hover {
@@ -274,7 +283,16 @@
   border-color: var(--color-card-bg);
   box-shadow:
     0 0 0 2px var(--color-text),
-    0 8px 12px rgba(15, 23, 42, 0.2);
+    0 0 0 5px color-mix(in srgb, var(--color-primary) 26%, transparent),
+    0 9px 14px rgba(15, 23, 42, 0.24);
+}
+
+.add-prompt-color-picker .color-option:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--color-card-bg),
+    0 0 0 5px color-mix(in srgb, var(--color-primary) 40%, transparent),
+    0 8px 12px rgba(15, 23, 42, 0.22);
 }
 
 .add-prompt-modal-actions {
@@ -300,6 +318,16 @@
 @media (max-width: 640px) {
   .add-prompt-modal-form {
     padding: 18px;
+  }
+
+  .add-prompt-color-picker {
+    gap: 10px;
+  }
+
+  .add-prompt-color-picker .color-option {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
   }
 
   .add-prompt-modal-actions {
