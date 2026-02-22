@@ -1,8 +1,13 @@
+import type { Prompt } from '../../models/Prompt';
 import { usePrompts } from '../../context/PromptContext';
 import { PromptCard } from '../PromptCard/PromptCard';
 import './PromptGrid.css';
 
-export const PromptGrid = () => {
+interface PromptGridProps {
+  onLongPressEdit: (prompt: Prompt) => void;
+}
+
+export const PromptGrid = ({ onLongPressEdit }: PromptGridProps) => {
   const { filteredPrompts, isLoading } = usePrompts();
 
   if (isLoading) {
@@ -27,7 +32,7 @@ export const PromptGrid = () => {
   return (
     <div className="prompt-grid">
       {filteredPrompts.map((prompt) => (
-        <PromptCard key={prompt.id} prompt={prompt} />
+        <PromptCard key={prompt.id} prompt={prompt} onLongPressEdit={onLongPressEdit} />
       ))}
     </div>
   );

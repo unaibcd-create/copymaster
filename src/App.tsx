@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState } from 'react';
+import type { Prompt } from './models/Prompt';
 import { PromptProvider, usePrompts } from './context/PromptContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
@@ -28,9 +29,14 @@ const EditPromptModal = lazy(() =>
 );
 
 const AppContent = () => {
-  const { selectedPrompt } = usePrompts();
+  const { selectedPrompt, setSelectedPrompt } = usePrompts();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const handleLongPressEdit = (prompt: Prompt) => {
+    setSelectedPrompt(prompt);
+    setIsEditModalOpen(true);
+  };
 
   return (
     <div className="app">
@@ -46,7 +52,7 @@ const AppContent = () => {
 
       <main className="main-content">
         <div className="grid-column">
-          <PromptGrid />
+          <PromptGrid onLongPressEdit={handleLongPressEdit} />
         </div>
         <div className={`preview-column ${selectedPrompt ? 'visible' : ''}`}>
           {selectedPrompt ? (
@@ -58,7 +64,7 @@ const AppContent = () => {
               <div className="preview-empty-content">
                 <div className="preview-empty-icon">Select</div>
                 <h3>Select a prompt</h3>
-                <p>Shift+Click on a card to preview it here</p>
+                <p>Shift+Click to preview, or press and hold a card for 1 second to edit</p>
               </div>
             </div>
           )}
