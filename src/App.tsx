@@ -3,6 +3,7 @@ import type { Prompt } from './models/Prompt';
 import { PromptProvider, usePrompts } from './context/PromptContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
+import { storageService } from './services/storageService';
 import { PromptGrid } from './components/PromptGrid/PromptGrid';
 import { SearchBar } from './components/SearchBar/SearchBar';
 import { ThemeToggle } from './components/ThemeToggle/ThemeToggle';
@@ -32,6 +33,7 @@ const AppContent = () => {
   const { selectedPrompt, setSelectedPrompt } = usePrompts();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const isUsingSupabase = storageService.isUsingSupabase;
 
   const handleLongPressEdit = (prompt: Prompt) => {
     setSelectedPrompt(prompt);
@@ -42,7 +44,16 @@ const AppContent = () => {
     <div className="app">
       <header className="header">
         <div className="header-content">
-          <h1 className="header-title">Prompt Manager</h1>
+          <div className="header-title-group">
+            <h1 className="header-title">Prompt Manager</h1>
+            <span
+              className={`sync-status ${isUsingSupabase ? 'online' : 'offline'}`}
+              aria-label={isUsingSupabase ? 'Cloud sync enabled' : 'Local storage only'}
+              title={isUsingSupabase ? 'Cloud sync enabled' : 'Local storage only'}
+            >
+              {isUsingSupabase ? 'Cloud Sync' : 'Local Only'}
+            </span>
+          </div>
           <div className="header-actions">
             <SearchBar />
             <ThemeToggle />
