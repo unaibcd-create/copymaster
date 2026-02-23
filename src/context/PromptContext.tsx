@@ -39,8 +39,11 @@ export const PromptProvider = ({ children }: { children: ReactNode }) => {
   const toErrorMessage = (error: unknown) =>
     error instanceof Error ? error.message : 'Unexpected storage error';
 
-  const refreshPrompts = useCallback(async () => {
-    setIsLoading(true);
+  const fetchPrompts = useCallback(async (showLoader = true) => {
+    if (showLoader) {
+      setIsLoading(true);
+    }
+
     try {
       const loadedPrompts = await storageService.getPrompts();
       setPrompts(loadedPrompts);
@@ -48,13 +51,27 @@ export const PromptProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       setStorageError(toErrorMessage(error));
     } finally {
-      setIsLoading(false);
+      if (showLoader) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
+  const refreshPrompts = useCallback(async () => {
+    await fetchPrompts(true);
+  }, [fetchPrompts]);
+
   useEffect(() => {
-    void refreshPrompts();
-  }, [refreshPrompts]);
+    const cachedPrompts = storageService.getCachedPrompts();
+    if (cachedPrompts.length > 0) {
+      setPrompts(cachedPrompts);
+      setIsLoading(false);
+      void fetchPrompts(false);
+      return;
+    }
+
+    void fetchPrompts(true);
+  }, [fetchPrompts]);
 
   const deferredSearchQuery = useDeferredValue(searchQuery);
 

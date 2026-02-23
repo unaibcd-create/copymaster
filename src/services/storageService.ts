@@ -4,6 +4,24 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 const STORAGE_KEY = 'prompt-manager-prompts';
 const TABLE_NAME = 'prompts';
 const IS_PROD = import.meta.env.PROD;
+let memoryCache: Prompt[] | null = null;
+
+const sortByNewest = (prompts: Prompt[]) =>
+  [...prompts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+const hydrateMemoryCache = (): Prompt[] => {
+  if (memoryCache) return memoryCache;
+  const cachedPrompts = localStorageOps.getPrompts();
+  memoryCache = sortByNewest(cachedPrompts);
+  return memoryCache;
+};
+
+const writeCache = (prompts: Prompt[]) => {
+  const sortedPrompts = sortByNewest(prompts);
+  memoryCache = sortedPrompts;
+  localStorageOps.savePrompts(sortedPrompts);
+  return sortedPrompts;
+};
 
 const isStorageMisconfigured = () => IS_PROD && !isSupabaseConfigured();
 
@@ -34,7 +52,7 @@ const localStorageOps = {
 
   addPrompt: (prompt: Prompt): Prompt[] => {
     const prompts = localStorageOps.getPrompts();
-    const updatedPrompts = [...prompts, prompt];
+    const updatedPrompts = sortByNewest([...prompts, prompt]);
     localStorageOps.savePrompts(updatedPrompts);
     return updatedPrompts;
   },
@@ -63,16 +81,16 @@ const supabaseOps = {
     
     const { data, error } = await supabase
       .from(TABLE_NAME)
-      .select('*')
+      .select('id,title,description,color,created_at,updated_at')
       .order('created_at', { ascending: false });
     
     if (error) {
       console.error('Error fetching from Supabase:', error);
-      return [];
+      return hydrateMemoryCache();
     }
     
     // Transform snake_case to camelCase
-    return (data || []).map(item => ({
+    const mappedPrompts = (data || []).map(item => ({
       id: item.id,
       title: item.title,
       description: item.description,
@@ -80,6 +98,8 @@ const supabaseOps = {
       updatedAt: item.updated_at,
       color: item.color,
     }));
+
+    return writeCache(mappedPrompts);
   },
 
   addPrompt: async (prompt: Prompt): Promise<Prompt[]> => {
@@ -98,9 +118,10 @@ const supabaseOps = {
     
     if (error) {
       console.error('Error adding to Supabase:', error);
+      return hydrateMemoryCache();
     }
     
-    return supabaseOps.getPrompts();
+    return writeCache([prompt, ...hydrateMemoryCache()]);
   },
 
   updatePrompt: async (updatedPrompt: Prompt): Promise<Prompt[]> => {
@@ -118,9 +139,14 @@ const supabaseOps = {
     
     if (error) {
       console.error('Error updating in Supabase:', error);
+      return hydrateMemoryCache();
     }
     
-    return supabaseOps.getPrompts();
+    const nextPrompts = hydrateMemoryCache().map((prompt) =>
+      prompt.id === updatedPrompt.id ? updatedPrompt : prompt
+    );
+
+    return writeCache(nextPrompts);
   },
 
   deletePrompt: async (id: string): Promise<Prompt[]> => {
@@ -133,9 +159,11 @@ const supabaseOps = {
     
     if (error) {
       console.error('Error deleting from Supabase:', error);
+      return hydrateMemoryCache();
     }
     
-    return supabaseOps.getPrompts();
+    const nextPrompts = hydrateMemoryCache().filter((prompt) => prompt.id !== id);
+    return writeCache(nextPrompts);
   },
 };
 
@@ -143,6 +171,7 @@ const supabaseOps = {
 export const storageService = {
   isUsingSupabase: isSupabaseConfigured(),
   isMisconfigured: isStorageMisconfigured(),
+  getCachedPrompts: (): Prompt[] => hydrateMemoryCache(),
 
   getPrompts: async (): Promise<Prompt[]> => {
     if (isSupabaseConfigured()) {
