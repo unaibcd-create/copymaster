@@ -134,6 +134,12 @@ body {
   border-color: #fdba74;
 }
 
+.sync-status.error {
+  color: #7f1d1d;
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
 .dark .sync-status.online {
   color: #86efac;
   background: rgba(22, 101, 52, 0.25);
@@ -144,6 +150,29 @@ body {
   color: #fdba74;
   background: rgba(124, 45, 18, 0.25);
   border-color: rgba(251, 146, 60, 0.45);
+}
+
+.dark .sync-status.error {
+  color: #fca5a5;
+  background: rgba(127, 29, 29, 0.35);
+  border-color: rgba(252, 165, 165, 0.45);
+}
+
+.storage-error-banner {
+  background: #fee2e2;
+  color: #7f1d1d;
+  border-top: 1px solid #fca5a5;
+  border-bottom: 1px solid #fca5a5;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.dark .storage-error-banner {
+  background: rgba(127, 29, 29, 0.2);
+  color: #fca5a5;
+  border-top-color: rgba(252, 165, 165, 0.35);
+  border-bottom-color: rgba(252, 165, 165, 0.35);
 }
 
 .header-actions {

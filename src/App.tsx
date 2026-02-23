@@ -30,15 +30,32 @@ const EditPromptModal = lazy(() =>
 );
 
 const AppContent = () => {
-  const { selectedPrompt, setSelectedPrompt } = usePrompts();
+  const { selectedPrompt, setSelectedPrompt, storageError } = usePrompts();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const isUsingSupabase = storageService.isUsingSupabase;
+  const isMisconfigured = storageService.isMisconfigured;
 
   const handleLongPressEdit = (prompt: Prompt) => {
     setSelectedPrompt(prompt);
     setIsEditModalOpen(true);
   };
+
+  const statusClassName = isUsingSupabase
+    ? 'online'
+    : isMisconfigured
+      ? 'error'
+      : 'offline';
+  const statusLabel = isUsingSupabase
+    ? 'Cloud Sync'
+    : isMisconfigured
+      ? 'Setup Required'
+      : 'Local Only';
+  const statusAriaLabel = isUsingSupabase
+    ? 'Cloud sync enabled'
+    : isMisconfigured
+      ? 'Cloud sync setup required'
+      : 'Local storage only';
 
   return (
     <div className="app">
@@ -47,11 +64,11 @@ const AppContent = () => {
           <div className="header-title-group">
             <h1 className="header-title">Prompt Manager</h1>
             <span
-              className={`sync-status ${isUsingSupabase ? 'online' : 'offline'}`}
-              aria-label={isUsingSupabase ? 'Cloud sync enabled' : 'Local storage only'}
-              title={isUsingSupabase ? 'Cloud sync enabled' : 'Local storage only'}
+              className={`sync-status ${statusClassName}`}
+              aria-label={statusAriaLabel}
+              title={statusAriaLabel}
             >
-              {isUsingSupabase ? 'Cloud Sync' : 'Local Only'}
+              {statusLabel}
             </span>
           </div>
           <div className="header-actions">
@@ -60,6 +77,12 @@ const AppContent = () => {
           </div>
         </div>
       </header>
+
+      {storageError && (
+        <div className="storage-error-banner" role="alert">
+          {storageError}
+        </div>
+      )}
 
       <main className="main-content">
         <div className="grid-column">

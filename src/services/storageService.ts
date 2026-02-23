@@ -3,6 +3,14 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 const STORAGE_KEY = 'prompt-manager-prompts';
 const TABLE_NAME = 'prompts';
+const IS_PROD = import.meta.env.PROD;
+
+const isStorageMisconfigured = () => IS_PROD && !isSupabaseConfigured();
+
+const getMisconfigurationError = () =>
+  new Error(
+    'Cloud sync is not configured for this deployed app. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in hosting environment settings, then redeploy.'
+  );
 
 // Local Storage Operations (fallback)
 const localStorageOps = {
@@ -134,10 +142,14 @@ const supabaseOps = {
 // Unified Storage Service
 export const storageService = {
   isUsingSupabase: isSupabaseConfigured(),
+  isMisconfigured: isStorageMisconfigured(),
 
   getPrompts: async (): Promise<Prompt[]> => {
     if (isSupabaseConfigured()) {
       return supabaseOps.getPrompts();
+    }
+    if (isStorageMisconfigured()) {
+      throw getMisconfigurationError();
     }
     return localStorageOps.getPrompts();
   },
@@ -146,6 +158,9 @@ export const storageService = {
     if (isSupabaseConfigured()) {
       return supabaseOps.addPrompt(prompt);
     }
+    if (isStorageMisconfigured()) {
+      throw getMisconfigurationError();
+    }
     return localStorageOps.addPrompt(prompt);
   },
 
@@ -153,12 +168,18 @@ export const storageService = {
     if (isSupabaseConfigured()) {
       return supabaseOps.updatePrompt(updatedPrompt);
     }
+    if (isStorageMisconfigured()) {
+      throw getMisconfigurationError();
+    }
     return localStorageOps.updatePrompt(updatedPrompt);
   },
 
   deletePrompt: async (id: string): Promise<Prompt[]> => {
     if (isSupabaseConfigured()) {
       return supabaseOps.deletePrompt(id);
+    }
+    if (isStorageMisconfigured()) {
+      throw getMisconfigurationError();
     }
     return localStorageOps.deletePrompt(id);
   },

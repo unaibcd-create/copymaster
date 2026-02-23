@@ -5,7 +5,12 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase credentials not found. Using localStorage fallback.');
+  const message = 'Supabase credentials not found.';
+  if (import.meta.env.PROD) {
+    console.error(`${message} Cloud sync is disabled for this build.`);
+  } else {
+    console.warn(`${message} Using localStorage fallback in development.`);
+  }
 }
 
 export const supabase = supabaseUrl && supabaseAnonKey 
@@ -13,5 +18,5 @@ export const supabase = supabaseUrl && supabaseAnonKey
   : null;
 
 export const isSupabaseConfigured = () => {
-  return supabaseUrl && supabaseAnonKey;
+  return Boolean(supabaseUrl && supabaseAnonKey);
 };
