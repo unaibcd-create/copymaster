@@ -75,3 +75,23 @@
     transform: scale(0.98);
   }
 }
+
+@media (min-width: 1024px) {
+  .prompt-card {
+    border-radius: 10px;
+  }
+
+  .prompt-card-content {
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .prompt-card-title {
+    font-size: 13px;
+  }
+
+  .prompt-card-description {
+    font-size: 10px;
+    -webkit-line-clamp: 3;
+  }
+}
